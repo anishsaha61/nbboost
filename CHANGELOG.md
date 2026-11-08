@@ -4,6 +4,9 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+### Fixed
+- The error box no longer triggers PySpark's `FutureWarning: Deprecated in 4.0.0, use getCondition instead`.
+
 ## [0.2.1] - 2026-11-08
 
 ### Fixed
