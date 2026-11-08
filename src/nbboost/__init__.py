@@ -3,5 +3,5 @@ from ._display import display, show_html
 from ._shell import install_methods, load
 from .nbutils import nbutils
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __all__ = ["display", "show_html", "install_methods", "load", "nbutils", "__version__"]
