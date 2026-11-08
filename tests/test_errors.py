@@ -134,3 +134,24 @@ def test_install_mutes_and_uninstall_restores(monkeypatch):
     cls()._log_exception()
     assert len(calls) == 1
     assert errors._pre_run_cell not in ip.events.callbacks["pre_run_cell"]
+
+
+def test_summarize_prefers_getcondition_and_avoids_deprecated_getErrorClass():
+    class E(SparkLike):
+        def getErrorClass(self):
+            raise AssertionError("deprecated getErrorClass was called")
+
+        def getCondition(self):
+            return "NEW_COND"
+
+    assert errors.summarize(E("m"))["errorClass"] == "NEW_COND"
+
+
+def test_summarize_falls_back_to_getErrorClass_on_old_pyspark():
+    class Old(Exception):
+        __module__ = "pyspark.errors.exceptions.captured"
+
+        def getErrorClass(self):
+            return "OLD_COND"
+
+    assert errors.summarize(Old("m"))["errorClass"] == "OLD_COND"

@@ -34,7 +34,7 @@ def _call(exc, name):
 
 def summarize(exc: BaseException) -> dict:
     """Pull out ``title``, ``message`` and optional ``sqlstate`` / ``code`` from a Spark error."""
-    cls = _call(exc, "getErrorClass") or _call(exc, "getCondition")
+    cls = _call(exc, "getCondition") or _call(exc, "getErrorClass")  # getErrorClass is deprecated in 4.0 and warns
     sqlstate = _call(exc, "getSqlState")
     msg = _call(exc, "getMessage")
     if not msg:
