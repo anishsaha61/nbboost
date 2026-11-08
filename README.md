@@ -17,7 +17,7 @@ and `df.display()` — with more on the way.
 - **`nbutils.fs`** and **`%fs`**: `ls` (shown as a table), `head`, `cp`, `mv`, `rm`, `mkdirs`, `put` on the local file system.
 - **`%md`** renders Markdown; **`%sh`** runs shell commands with streamed output and exit code.
 - **Cleaner Spark errors**: a short red box with the error class and message; the Python/JVM stack trace is folded behind "Show stack trace".
-- **Run timing and progress**: "Command took 2.3s" after cells that run >= 0.5s, and a live progress bar for slow Spark Connect queries.
+- **Run timing and Spark Jobs**: "Command took 2.3s" after cells that run >= 0.5s, and a collapsible **Spark Jobs** block for slow Spark Connect queries: a live overall bar in the header, and per-query, per-stage progress when expanded. It stays (collapsed) after the cell finishes.
 
 ## Install
 
