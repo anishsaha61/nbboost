@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.11", "3.13"]
+        extras: ["test", "test,spark"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-java@v4
+        if: contains(matrix.extras, 'spark')
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install
+        run: pip install -e ".[${{ matrix.extras }}]"
+      - name: Install Chromium for browser smoke tests
+        run: python -m playwright install --with-deps chromium
+      - name: Test
+        run: >
+          pytest -ra --junitxml=test-results.xml
+          --cov=nbboost --cov-report=xml --cov-report=term-missing --cov-report=html
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-evidence-py${{ matrix.python }}-${{ matrix.extras == 'test' && 'core' || 'spark' }}
+          path: |
+            test-results.xml
+            coverage.xml
+            htmlcov/
