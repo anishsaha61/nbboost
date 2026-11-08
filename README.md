@@ -54,6 +54,7 @@ If you use the `ipython-sql` extension, pass `sql_magic=False` to avoid a `%sql`
 
 ```bash
 pip install -e ".[test]"
+python -m playwright install chromium   # only for the browser smoke tests
 pytest
 ```
 
