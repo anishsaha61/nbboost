@@ -4,7 +4,18 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+### Added
+- `nbutils.widgets` (text, dropdown, combobox, multiselect) with `:name` SQL parameters in `%%sql`.
+- `nbutils.notebook.run()` / `exit()`: run a notebook in a fresh kernel with arguments, a timeout and an optional saved output copy.
+- `nbutils.secrets` from environment variables or `~/.nbboost/secrets.json`, with redacted `repr`.
+- `nbutils.data.summarize(df)` opens the Data profile tab.
+- Query plan viewer: `nbutils.data.explain(df_or_sql)` and `%%sql --explain [mode]` show a collapsible, annotated tree.
+- Catalog autocomplete for `%sql`, `spark.table()` and `spark.sql()`, plus `nbutils.catalog` listings; `load(autocomplete=False)` turns it off.
+- Install extras: `widgets`, `notebook`, `all`.
+
 ### Changed
+- Requires IPython 8.6 or later (for the completion API).
+- `%%sql` rejects unknown options instead of ignoring them.
 - The Spark Connect progress bar is now a collapsible "Spark Jobs" block: one per cell, with an overall bar in the header and per-query, per-stage progress when expanded. It stays (collapsed) after the cell finishes instead of disappearing, and keeps its open/closed state while it updates. Stages that were never reported complete are dimmed.
 
 ### Fixed

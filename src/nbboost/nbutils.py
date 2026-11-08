@@ -139,10 +139,21 @@ class _NbUtils:
     """Namespace object exposed as ``nbutils`` in notebooks."""
 
     def __init__(self):
+        from .catalog import catalog
+        from .data import data
+        from .notebook import notebook
+        from .secrets import secrets
+        from .widgets import widgets
+
         self.fs = fs
+        self.widgets = widgets
+        self.notebook = notebook
+        self.secrets = secrets
+        self.data = data
+        self.catalog = catalog
 
     def __repr__(self):
-        return "nbutils(fs)"
+        return "nbutils(" + ", ".join(k for k in vars(self) if not k.startswith("_")) + ")"
 
 
 fs = FS()

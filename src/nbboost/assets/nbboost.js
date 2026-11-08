@@ -1299,6 +1299,8 @@
       vizCount = Math.max(vizCount, sv.vc || 0);
       show(made[sv.active] || tabs[0]);        // always re-sync panel visibility (restored panels start visible)
     } } catch (e) {}
+    // nbutils.data.summarize(df): open the profile tab
+    try { if (P.openTab === "profile") { show(tabs.find(function (t) { return t.id === "profile"; }) || addProfile()); } } catch (e) {}
     restoring = false; persist();
   }
   updateFooter();

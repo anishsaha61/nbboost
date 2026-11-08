@@ -93,3 +93,16 @@ def test_spark_jobs_block_keeps_open_state_across_updates(browser):
     assert "1 query" in page.inner_text("details.nbb-jobs > summary")
     assert errors == []
     page.close()
+
+
+def test_summarize_opens_profile_tab(browser, shown):
+    from nbboost.nbutils import nbutils
+    nbutils.data.summarize(pd.DataFrame({"x": [1, 2, 3], "s": ["a", "b", None]}))
+    page = browser.new_page(viewport={"width": 1100, "height": 700})
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.set_content(f"<!doctype html><html><body>{html_of(shown[0])}</body></html>")
+    page.wait_for_selector(".nbb-root .nbb-tabs", timeout=5000)
+    page.wait_for_function("document.querySelector('.nbb-root').innerText.includes('Profile of')", timeout=5000)
+    assert errors == []
+    page.close()
