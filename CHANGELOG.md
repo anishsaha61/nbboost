@@ -4,6 +4,19 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+### Added
+- `nbutils.widgets` (text, dropdown, combobox, multiselect) with `:name` SQL parameters in `%%sql`.
+- `nbutils.notebook.run()` / `exit()`: run a notebook in a fresh kernel with arguments, a timeout and an optional saved output copy.
+- `nbutils.secrets` from environment variables or `~/.nbboost/secrets.json`, with redacted `repr`.
+- `nbutils.data.summarize(df)` opens the Data profile tab.
+- Query plan viewer: `nbutils.data.explain(df_or_sql)` and `%%sql --explain [mode]` show a collapsible, annotated tree.
+- Catalog autocomplete for `%sql`, `spark.table()` and `spark.sql()`, plus `nbutils.catalog` listings; `load(autocomplete=False)` turns it off.
+- Install extras: `widgets`, `notebook`, `all`.
+
+### Changed
+- Requires IPython 8.6 or later (for the completion API).
+- `%%sql` rejects unknown options instead of ignoring them.
+
 ### Fixed
 - The error box no longer triggers PySpark's `FutureWarning: Deprecated in 4.0.0, use getCondition instead`.
 
