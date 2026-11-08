@@ -4,6 +4,14 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+### Added
+- JupyterLab extension, installed with the package:
+  - hover bar between cells to insert Code, Markdown or SQL (`%%sql`) cells;
+  - per-cell run button with Run cell / Run all above / Run this and all below;
+  - labelled Run all button and a cleaner notebook toolbar;
+  - refreshed cell styling for light and dark themes;
+  - command-palette entries for inserting SQL and Markdown cells.
+
 ## [0.3.0] - 2026-11-09
 
 ### Added
