@@ -26,7 +26,7 @@ dependencies = ["ipython>=8"]
 [project.optional-dependencies]
 spark = ["pyspark>=3.5"]
 pandas = ["pandas>=1.5"]
-test = ["pytest>=8", "pandas>=1.5"]
+test = ["pytest>=8", "pytest-cov", "pandas>=1.5", "playwright"]
 
 [project.urls]
 Homepage = "https://github.com/anishsaha61/nbboost"
@@ -40,3 +40,4 @@ packages = ["src/nbboost"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["browser: headless-browser smoke tests (need Playwright + Chromium)"]

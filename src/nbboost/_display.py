@@ -320,7 +320,7 @@ def _render(payload):
     out = (
         f'<div id="{rid}" class="nbb-root" data-lm-suppress-shortcuts="true" '
         f'data-p-suppress-shortcuts="true">{_static_table(payload)}</div>'
-        f"<style>{_asset("nbboost.css")}</style>"
+        f"<style>{_asset('nbboost.css')}</style>"
         f'<script type="application/json" id="{rid}-data">{data}</script>'
         f"<script>{_asset('nbboost.js').replace('__ROOT_ID__', rid)}</script>"
     )
