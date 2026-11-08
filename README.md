@@ -23,6 +23,11 @@ and `df.display()` — with more on the way.
 - **`nbutils.secrets`**: read credentials from environment variables or a private JSON file; values are hidden in `repr`.
 - **`nbutils.data.summarize(df)`**: the table with its Data profile tab already open.
 - **Query plan viewer**: `nbutils.data.explain(df)` or `%%sql --explain` shows the plan as a collapsible tree, with shuffles, broadcasts and expensive joins tagged.
+- **JupyterLab extension** (installed automatically with the package):
+  - a hover bar between cells to insert **+ Code**, **+ Markdown** or **+ SQL** (`%%sql`) cells;
+  - a ▶ run button on every cell with **Run cell / Run all above / Run this and all below**;
+  - a labelled **Run all** button and a cleaner toolbar;
+  - rounded, quieter cell styling that follows the light or dark theme.
 - **Catalog autocomplete**: Tab completes databases, tables and columns in `%sql` cells, `spark.table("…")` and `spark.sql("…")`; `nbutils.catalog` lists them.
 
 ## Install
@@ -133,6 +138,13 @@ To enable it in every kernel, copy `examples/50-nbboost.py` to
 (all `True` by default) to opt out of parts. Note `%sh` replaces IPython's built-in `%sh`; use `magics_=False` to keep it.
 If you use the `ipython-sql` extension, pass `sql_magic=False` to avoid a `%sql` clash.
 
+### JupyterLab extension
+
+Installing nbboost into the environment that runs JupyterLab adds the extension; reload the browser
+tab (restart JupyterLab if it was already running). Commands are also in the command palette:
+*Insert SQL Cell Below/Above* and *Insert Markdown Cell Below*. To turn it off:
+`jupyter labextension disable nbboost`.
+
 ## Known limits
 
 - `nbutils.fs` works on the notebook machine's local disk only (no `dbfs:`, S3 or HDFS paths). `rm` refuses `/` and your home directory.
@@ -156,3 +168,17 @@ pytest
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+### JupyterLab extension
+
+The TypeScript source is in `labextension/`; the built files are committed in
+`src/nbboost/labextension/` so that installing from git needs no Node.js. After changing the source:
+
+```bash
+pip install "jupyterlab>=4,<5"
+cd labextension && npm ci && npm run build      # then commit src/nbboost/labextension
+pip install .                                   # a regular install puts it in share/jupyter/labextensions
+pytest -m jupyterlab                            # end-to-end test in a real JupyterLab
+```
+
+CI fails if the committed build doesn't match the source.

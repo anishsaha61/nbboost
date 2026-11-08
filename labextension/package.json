@@ -1,0 +1,49 @@
+{
+  "name": "nbboost",
+  "version": "0.4.0",
+  "description": "nbboost JupyterLab extension: insert Code / Markdown / SQL cells between cells, per-cell run menu, polished notebook toolbar and cells",
+  "license": "MIT",
+  "author": "Anish Saha",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anishsaha61/nbboost.git"
+  },
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "files": [
+    "lib/**/*.js",
+    "style/**/*.css",
+    "style/index.js"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "styleModule": "style/index.js",
+  "sideEffects": [
+    "style/*.css",
+    "style/index.js"
+  ],
+  "scripts": {
+    "build": "tsc && jupyter-builder build .",
+    "build:lib": "tsc",
+    "clean": "rm -rf lib tsconfig.tsbuildinfo ../src/nbboost/labextension"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^4.0.0",
+    "@jupyterlab/apputils": "^4.0.0",
+    "@jupyterlab/notebook": "^4.0.0",
+    "@lumino/widgets": "^2.0.0",
+    "@jupyterlab/cells": "^4.0.0"
+  },
+  "devDependencies": {
+    "@jupyter/builder": "^1.2.4",
+    "typescript": "~5.5.4"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "outputDir": "../src/nbboost/labextension"
+  }
+}
