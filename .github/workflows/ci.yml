@@ -59,18 +59,13 @@ jobs:
           cache-dependency-path: labextension/package-lock.json
       - name: Install JupyterLab and build tools
         run: pip install "jupyterlab>=4,<5"
-      - name: Build the extension
-        working-directory: labextension
+      - name: Build the extension (fresh, into a scratch copy of the output folder)
         run: |
-          npm ci
-          npm run build
+          cp -r src/nbboost/labextension "$RUNNER_TEMP/committed"
+          rm -rf src/nbboost/labextension
+          cd labextension && npm ci && npm run build
       - name: Committed build is up to date
-        run: |
-          if [ -n "$(git status --porcelain src/nbboost/labextension)" ]; then
-            git status --porcelain src/nbboost/labextension
-            echo "::error::src/nbboost/labextension is out of date: run 'npm run build' in labextension/ and commit the result"
-            exit 1
-          fi
+        run: python scripts/check_labextension_build.py "$RUNNER_TEMP/committed" src/nbboost/labextension
       - name: Install nbboost (regular install, so the extension lands in share/jupyter)
         run: pip install ".[test]"
       - run: jupyter labextension list
