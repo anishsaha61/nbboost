@@ -21,3 +21,8 @@ htmlcov/
 spark-warehouse/
 metastore_db/
 derby.log
+
+# JupyterLab extension build
+labextension/node_modules/
+labextension/lib/
+labextension/tsconfig.tsbuildinfo

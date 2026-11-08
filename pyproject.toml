@@ -40,7 +40,20 @@ path = "src/nbboost/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/nbboost"]
+exclude = ["src/nbboost/labextension"]
+
+# The JupyterLab extension is prebuilt (labextension/ -> src/nbboost/labextension, see README)
+# so that installing from git needs no Node.js.
+[tool.hatch.build.targets.wheel.shared-data]
+"src/nbboost/labextension" = "share/jupyter/labextensions/nbboost"
+"labextension/install.json" = "share/jupyter/labextensions/nbboost/install.json"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["labextension/node_modules", "labextension/lib", ".github"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["browser: headless-browser smoke tests (need Playwright + Chromium)"]
+markers = [
+  "browser: headless-browser smoke tests (need Playwright + Chromium)",
+  "jupyterlab: end-to-end tests of the JupyterLab extension (need JupyterLab + Playwright)",
+]

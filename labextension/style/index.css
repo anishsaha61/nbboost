@@ -1,0 +1,282 @@
+/* nbboost: insert-cell bar between notebook cells */
+.jp-Notebook .jp-Cell {
+  position: relative;
+}
+
+.nbb-insert {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -10px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.12s ease-in-out;
+  z-index: 20;
+}
+
+.nbb-insert.nbb-insert-top {
+  top: -10px;
+  bottom: auto;
+}
+
+/* thin line across the gap, behind the buttons */
+.nbb-insert::before {
+  content: '';
+  position: absolute;
+  left: var(--jp-cell-collapser-width, 8px);
+  right: 8px;
+  top: 50%;
+  border-top: 1px solid var(--jp-brand-color2);
+  z-index: -1;
+}
+
+.nbb-insert:hover,
+.nbb-insert:focus-within {
+  opacity: 1;
+}
+
+.nbb-insert button {
+  font-family: var(--jp-ui-font-family);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 18px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--jp-border-color1);
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.nbb-insert button:hover,
+.nbb-insert button:focus-visible {
+  border-color: var(--jp-brand-color1);
+  color: var(--jp-brand-color1);
+  outline: none;
+}
+
+/* not in print / non-interactive views */
+@media print {
+  .nbb-insert {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Per-cell run control: [▶][⌄] in the prompt column                    */
+/* ------------------------------------------------------------------ */
+.jp-Notebook .jp-Cell.nbb-menu-open {
+  z-index: 40;
+}
+
+.nbb-run {
+  position: absolute;
+  top: 11px;
+  left: calc(var(--jp-cell-collapser-width, 8px) + 6px);
+  display: flex;
+  align-items: center;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid var(--jp-border-color1);
+  background: var(--jp-layout-color1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transition: opacity 0.12s ease-in-out;
+  z-index: 15;
+}
+
+.jp-Cell:hover > .nbb-run,
+.jp-Cell.jp-mod-active > .nbb-run,
+.nbb-run:focus-within {
+  opacity: 1;
+}
+
+/* the execution count makes room while the run control is visible */
+.nbb-notebook .jp-Cell:hover .jp-InputPrompt,
+.nbb-notebook .jp-Cell.jp-mod-active .jp-InputPrompt {
+  opacity: 0;
+}
+
+.nbb-run button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--jp-ui-font-color1);
+  cursor: pointer;
+  padding: 0 6px;
+}
+
+.nbb-run .nbb-run-play {
+  color: var(--jp-brand-color1);
+  border-radius: 5px 0 0 5px;
+}
+
+.nbb-run .nbb-run-more {
+  border-left: 1px solid var(--jp-border-color2);
+  border-radius: 0 5px 5px 0;
+  padding: 0 4px;
+}
+
+.nbb-run button:hover,
+.nbb-run button:focus-visible {
+  background: var(--jp-layout-color2);
+  outline: none;
+}
+
+.nbb-run-menu {
+  position: absolute;
+  top: 26px;
+  left: 0;
+  min-width: 190px;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--jp-border-color1);
+  background: var(--jp-layout-color0);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  z-index: 30;
+}
+
+.nbb-run-menu button {
+  display: block;
+  width: 100%;
+  height: auto;
+  text-align: left;
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+  padding: 6px 10px;
+  border-radius: 5px;
+}
+
+.nbb-run-menu button:hover,
+.nbb-run-menu button:focus-visible {
+  background: var(--jp-layout-color2);
+}
+
+/* ------------------------------------------------------------------ */
+/* Notebook toolbar                                                     */
+/* ------------------------------------------------------------------ */
+.nbb-notebook .jp-NotebookPanel-toolbar {
+  padding: 0 10px;
+  gap: 2px;
+  background: var(--jp-layout-color1);
+  border-bottom: 1px solid var(--jp-border-color2);
+  box-shadow: none;
+}
+
+.nbb-notebook .jp-NotebookPanel-toolbar .jp-ToolbarButtonComponent {
+  border-radius: 6px;
+}
+
+.nbb-notebook .jp-NotebookPanel-toolbar .jp-ToolbarButtonComponent:hover {
+  background: var(--jp-layout-color2);
+}
+
+.nbb-notebook .jp-Notebook-toolbarCellType select,
+.nbb-notebook .jp-Notebook-toolbarCellTypeDropdown select {
+  border-radius: 6px;
+  border: 1px solid var(--jp-border-color2);
+  padding: 0 22px 0 8px;
+  background-color: var(--jp-layout-color1);
+}
+
+.nbb-notebook .jp-ToolbarButtonComponent.nbb-tb-runall {
+  margin: 0 8px;
+  height: 24px;
+  border-radius: 6px;
+  background-color: var(--jp-brand-color1);
+}
+
+.nbb-notebook .jp-ToolbarButtonComponent.nbb-tb-runall:hover {
+  background-color: var(--jp-brand-color0);
+}
+
+.nbb-notebook .jp-ToolbarButtonComponent.nbb-tb-runall .jp-ToolbarButtonComponent-label {
+  color: #fff;
+  font-weight: 600;
+  font-size: var(--jp-ui-font-size1);
+  padding: 0 4px;
+}
+
+.nbb-notebook .jp-ToolbarButtonComponent.nbb-tb-runall .jp-ToolbarButtonComponent-label::before {
+  content: '▶';
+  font-size: 9px;
+  margin-right: 6px;
+  vertical-align: 1px;
+}
+
+/* group the icon buttons: file | edit | run, then the cell type */
+.nbb-notebook .jp-NotebookPanel-toolbar .jp-Toolbar-item[data-jp-item-name='save'],
+.nbb-notebook .jp-NotebookPanel-toolbar .jp-Toolbar-item[data-jp-item-name='paste'] {
+  margin-right: 5px;
+  padding-right: 5px;
+  border-right: 1px solid var(--jp-border-color2);
+}
+
+.nbb-notebook .jp-NotebookPanel-toolbar .jp-KernelName {
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 999px;
+  padding: 0 10px;
+  margin-right: 4px;
+}
+
+.nbb-notebook .jp-NotebookPanel-toolbar .jp-KernelName:hover {
+  background: var(--jp-layout-color2);
+}
+
+/* ------------------------------------------------------------------ */
+/* Cells                                                                */
+/* ------------------------------------------------------------------ */
+.nbb-notebook .jp-Notebook .jp-Cell {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.nbb-notebook .jp-Cell .jp-InputArea-editor {
+  border-radius: 8px;
+  border: 1px solid var(--jp-border-color2);
+  background: var(--jp-layout-color0);
+  overflow: hidden;
+  transition: border-color 0.12s ease-in-out, box-shadow 0.12s ease-in-out;
+}
+
+.nbb-notebook .jp-Cell.jp-mod-active .jp-InputArea-editor {
+  border-color: var(--jp-border-color1);
+}
+
+.nbb-notebook .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {
+  border-color: var(--jp-brand-color1);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--jp-brand-color1) 22%, transparent);
+}
+
+.nbb-notebook .jp-InputPrompt,
+.nbb-notebook .jp-OutputPrompt {
+  font-size: 11px;
+  opacity: 0.55;
+  transition: opacity 0.12s ease-in-out;
+}
+
+.nbb-notebook .jp-Cell .jp-Collapser-child {
+  border-radius: 3px;
+}
+
+.nbb-notebook .jp-MarkdownCell .jp-RenderedMarkdown {
+  padding: 2px 8px;
+}
+
+.nbb-notebook .jp-Cell .jp-OutputArea-output {
+  padding-top: 4px;
+}
+
+.nbb-notebook .jp-CodeCell .cm-editor,
+.nbb-notebook .jp-CodeCell .cm-gutters {
+  background: transparent;
+}
