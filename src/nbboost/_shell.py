@@ -5,8 +5,9 @@ import sys
 
 from IPython import get_ipython
 
-from . import sqlmagic
+from . import errors, magics, runtime, sqlmagic
 from ._display import DEFAULT_LIMIT, display, show_html
+from .nbutils import nbutils
 
 
 def _display_method(self, limit: int | None = DEFAULT_LIMIT):
@@ -45,25 +46,52 @@ def _pre_run_cell(*_args, **_kwargs):
     install_methods()
 
 
-def load(*, namespace: bool = True, methods: bool = True, sql_magic: bool = True) -> None:
+def _before_cell(*_args, **_kwargs):
+    runtime.before_cell()
+    ip = get_ipython()
+    if ip is not None:
+        runtime.attach_progress(ip)
+
+
+def _reregister(ip, event, fn, on):
+    try:
+        ip.events.unregister(event, fn)
+    except ValueError:
+        pass
+    if on:
+        ip.events.register(event, fn)
+
+
+def load(*, namespace: bool = True, methods: bool = True, sql_magic: bool = True,
+         magics_: bool = True, errors_: bool = True, timing: bool = True, progress: bool = True) -> None:
     """Wire nbboost into the running IPython/Jupyter session.
 
-    ``namespace``  puts ``display`` and ``show_html`` into the notebook's variables.
+    ``namespace``  puts ``display``, ``show_html`` and ``nbutils`` into the notebook's variables.
     ``methods``    adds ``.display()`` to Spark / pandas DataFrames (and re-checks before each cell).
     ``sql_magic``  registers ``%sql`` / ``%%sql``.
+    ``magics_``    registers ``%fs``, ``%md`` and ``%sh`` (``%sh`` replaces IPython's built-in one).
+    ``errors_``    shows Spark errors as a short box with the stack trace collapsed.
+    ``timing``     prints "Command took 2.3s" after cells that run for at least half a second.
+    ``progress``   shows a live progress bar for slow Spark Connect queries.
     Safe to call more than once.
     """
     ip = get_ipython()
     if ip is None:
         raise RuntimeError("nbboost.load() must be called from IPython or Jupyter")
     if namespace:
-        ip.push({"display": display, "show_html": show_html})
+        ip.push({"display": display, "show_html": show_html, "nbutils": nbutils})
     if methods:
         install_methods()
-        try:
-            ip.events.unregister("pre_run_cell", _pre_run_cell)
-        except ValueError:
-            pass
-        ip.events.register("pre_run_cell", _pre_run_cell)
+    _reregister(ip, "pre_run_cell", _pre_run_cell, methods)
     if sql_magic:
         sqlmagic.register(ip)
+    if magics_:
+        magics.register(ip)
+    if errors_:
+        errors.install(ip)
+    else:
+        errors.uninstall(ip)
+    _reregister(ip, "pre_run_cell", _before_cell, timing or progress)
+    _reregister(ip, "post_run_cell", runtime.after_cell, timing)
+    if progress:
+        runtime.attach_progress(ip)

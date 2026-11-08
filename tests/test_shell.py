@@ -42,3 +42,19 @@ def test_load_can_skip_the_sql_magic():
     ip.magics_manager.magics["cell"].pop("sql", None)
     nbboost.load(sql_magic=False)
     assert "sql" not in ip.magics_manager.magics["line"]
+
+
+def test_load_wires_new_features_and_flags_turn_them_off():
+    ip = InteractiveShell.instance()
+    nbboost.load()
+    assert ip.user_ns["nbutils"] is nbboost.nbutils
+    for k in ("fs", "md", "sh"):
+        assert k in ip.magics_manager.magics["line"]
+    assert ip.events.callbacks["pre_run_cell"].count(_shell._before_cell) == 1
+    assert ip.events.callbacks["post_run_cell"].count(_shell.runtime.after_cell) == 1
+    assert hasattr(ip, "_nbboost_orig_showtraceback")
+    nbboost.load(timing=False, progress=False, errors_=False)
+    assert _shell._before_cell not in ip.events.callbacks["pre_run_cell"]
+    assert _shell.runtime.after_cell not in ip.events.callbacks["post_run_cell"]
+    assert not hasattr(ip, "_nbboost_orig_showtraceback")
+    nbboost.load()
