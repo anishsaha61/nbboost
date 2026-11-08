@@ -15,11 +15,6 @@ def stage(n, done, fin=False, b=0):
     return NS(num_tasks=n, num_completed_tasks=done, num_bytes_read=b, done=fin)
 
 
-def test_render_progress():
-    h = runtime.render_progress([stage(10, 4, b=2048), stage(5, 5, True)], 3, 1.25)
-    assert "width:60.0%" in h and "9/15 tasks" in h and "stage 1/2" in h and "2.0 KiB read" in h and "1.2s" in h
-
-
 class Handle:
     def __init__(self):
         self.updates = []
@@ -47,28 +42,79 @@ def make_bar():
     return runtime.ProgressBar(display=disp, clock=clock), clock, handles
 
 
-def test_fast_queries_show_no_bar():
+def stage_at(sid, n, done, fin=False, b=0):
+    return NS(stage_id=sid, num_tasks=n, num_completed_tasks=done, num_bytes_read=b, done=fin)
+
+
+def test_fast_queries_show_no_block():
     bar, clock, handles = make_bar()
-    bar([stage(2, 1)], 1, "op", False)
+    bar([stage_at(1, 2, 1)], 1, "op", False)
     clock.t = 0.1
-    bar([stage(2, 2)], 0, "op", False)
+    bar([stage_at(1, 2, 2)], 0, "op", False)
     bar(None, 0, "op", True)
     assert handles == []
 
 
-def test_slow_query_shows_updates_then_clears():
+def test_slow_query_shows_live_block_then_keeps_a_collapsed_summary():
     bar, clock, handles = make_bar()
-    bar([stage(10, 0)], 4, "op", False)
+    bar([stage_at(3, 10, 0)], 4, "op", False)
     clock.t = 1.0
-    bar([stage(10, 3)], 4, "op", False)
-    clock.t = 1.05  # throttled
-    bar([stage(10, 4)], 4, "op", False)
+    bar([stage_at(3, 10, 3, b=2048)], 4, "op", False)        # appears after the delay
+    clock.t = 1.05
+    bar([stage_at(3, 10, 4)], 4, "op", False)                 # throttled
     clock.t = 2.0
-    bar([stage(10, 8)], 2, "op", False)
-    bar(None, 0, "op", True)
+    bar([stage_at(3, 10, 8), stage_at(4, 5, 0)], 2, "op", False)
+    clock.t = 2.5
+    bar(None, 0, "op", True)                                  # finished: always rendered
     assert len(handles) == 1
     h = handles[0]
-    assert "30.0%" in h.first and "80.0%" in h.updates[0] and h.updates[-1] == ""
+    assert "<details class='nbb-jobs'" in h.first and " open" not in h.first.split("<summary")[0]
+    assert "3/10 tasks · 4 running" in h.first and "2.0 KiB read" in h.first
+    assert len(h.updates) == 2
+    assert "8/15 tasks" in h.updates[0] and "Stage 4" in h.updates[0]
+    final = h.updates[-1]
+    assert "1 query · 2 stages · 8/15 tasks · 2.5s" in final and "finished" in final
+    assert "running" not in final.split("</summary>")[0]
+    assert "class='stale'" in final       # stage 4 never reported complete -> shown dimmed, not as running
+
+
+
+
+def test_one_block_per_cell_lists_every_query():
+    bar, clock, handles = make_bar()
+    bar([stage_at(1, 4, 0)], 1, "a", False)
+    clock.t = 1.0
+    bar([stage_at(1, 4, 2)], 1, "a", False)
+    bar(None, 0, "a", True)
+    clock.t = 1.5
+    bar([stage_at(2, 6, 6, fin=True)], 0, "b", False)
+    bar(None, 0, "b", True)
+    assert len(handles) == 1
+    final = handles[0].updates[-1]
+    assert "2 queries" in final and "Query 1" in final and "Query 2" in final and "✓" in final
+    bar.new_cell()                                             # next cell gets its own block
+    clock.t = 3.0
+    bar([stage_at(9, 1, 0)], 1, "c", False)
+    clock.t = 4.0
+    bar([stage_at(9, 1, 0)], 1, "c", False)
+    assert len(handles) == 2
+
+
+def test_block_remembers_open_state_across_updates():
+    bar, clock, handles = make_bar()
+    bar([stage_at(1, 2, 0)], 1, "op", False)
+    clock.t = 1.0
+    bar([stage_at(1, 2, 1)], 1, "op", False)
+    h = handles[0].first
+    did = h.split("id='")[1].split("'")[0]
+    assert f"getElementById('{did}')" in h and "__nbbJobs" in h
+
+
+def test_before_cell_starts_a_new_block(monkeypatch):
+    called = []
+    monkeypatch.setattr(runtime._BAR, "new_cell", lambda: called.append(1))
+    runtime.before_cell()
+    assert called == [1]
 
 
 def test_handler_never_raises():

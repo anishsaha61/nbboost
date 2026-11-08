@@ -58,3 +58,38 @@ def test_empty_and_null_values_render(browser, shown):
     assert page.locator(".nbb-row").count() >= 2  # data rows (+ header)
     assert errors == []
     page.close()
+
+
+def test_spark_jobs_block_keeps_open_state_across_updates(browser):
+    from types import SimpleNamespace as NS
+
+    from nbboost import runtime
+
+    S = lambda i, n, d, f=False: NS(stage_id=i, num_tasks=n, num_completed_tasks=d, num_bytes_read=0, done=f)  # noqa: E731
+    outs, clock = [], NS(t=0.0)
+
+    class H:
+        def update(self, o):
+            outs.append(o.data)
+
+    bar = runtime.ProgressBar(display=lambda o, display_id=False: (outs.append(o.data), H())[1], clock=lambda: clock.t)
+    bar([S(1, 10, 0)], 2, "q", False)
+    clock.t = 1.0
+    bar([S(1, 10, 4)], 2, "q", False)
+    clock.t = 2.0
+    bar(None, 0, "q", True)
+    # render the way JupyterLab does: replace the output HTML and run its scripts
+    render = """(h)=>{const c=document.getElementById('out');c.innerHTML=h;
+      c.querySelectorAll('script').forEach(s=>{const n=document.createElement('script');n.textContent=s.textContent;s.replaceWith(n);});}"""
+    page = browser.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.set_content("<!doctype html><html><body><div id='out'></div></body></html>")
+    page.evaluate(render, outs[0])
+    assert page.evaluate("document.querySelector('details.nbb-jobs').open") is False   # collapsed by default
+    page.click("details.nbb-jobs > summary")
+    page.evaluate(render, outs[-1])
+    assert page.evaluate("document.querySelector('details.nbb-jobs').open") is True    # stays open
+    assert "1 query" in page.inner_text("details.nbb-jobs > summary")
+    assert errors == []
+    page.close()
