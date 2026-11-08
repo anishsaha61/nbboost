@@ -4,6 +4,8 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-08
+
 ### Fixed
 - Spark errors no longer also print PySpark's huge JSON error log (message + JVM stack trace) in red; only the short error box is shown. Turn off with `load(errors_=False)`.
 
@@ -22,5 +24,6 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 - Interactive table viewer, charts, filters, column profiling and persistence.
 - `%sql` / `%%sql` magic and `df.display()`.
 
-[Unreleased]: https://github.com/anishsaha61/nbboost/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/anishsaha61/nbboost/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/anishsaha61/nbboost/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/anishsaha61/nbboost/releases/tag/v0.2.0
