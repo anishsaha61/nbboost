@@ -4,6 +4,8 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-09
+
 ### Added
 - `nbutils.widgets` (text, dropdown, combobox, multiselect) with `:name` SQL parameters in `%%sql`.
 - `nbutils.notebook.run()` / `exit()`: run a notebook in a fresh kernel with arguments, a timeout and an optional saved output copy.
@@ -41,6 +43,7 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 - Interactive table viewer, charts, filters, column profiling and persistence.
 - `%sql` / `%%sql` magic and `df.display()`.
 
-[Unreleased]: https://github.com/anishsaha61/nbboost/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/anishsaha61/nbboost/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/anishsaha61/nbboost/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/anishsaha61/nbboost/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/anishsaha61/nbboost/releases/tag/v0.2.0
