@@ -16,6 +16,7 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 ### Changed
 - Requires IPython 8.6 or later (for the completion API).
 - `%%sql` rejects unknown options instead of ignoring them.
+- The Spark Connect progress bar is now a collapsible "Spark Jobs" block: one per cell, with an overall bar in the header and per-query, per-stage progress when expanded. It stays (collapsed) after the cell finishes instead of disappearing, and keeps its open/closed state while it updates. Stages that were never reported complete are dimmed.
 
 ### Fixed
 - The error box no longer triggers PySpark's `FutureWarning: Deprecated in 4.0.0, use getCondition instead`.
