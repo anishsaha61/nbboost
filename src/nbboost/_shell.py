@@ -5,7 +5,7 @@ import sys
 
 from IPython import get_ipython
 
-from . import errors, magics, runtime, sqlmagic
+from . import completion, errors, magics, runtime, sqlmagic
 from ._display import DEFAULT_LIMIT, display, show_html
 from .nbutils import nbutils
 
@@ -63,7 +63,8 @@ def _reregister(ip, event, fn, on):
 
 
 def load(*, namespace: bool = True, methods: bool = True, sql_magic: bool = True,
-         magics_: bool = True, errors_: bool = True, timing: bool = True, progress: bool = True) -> None:
+         magics_: bool = True, errors_: bool = True, timing: bool = True, progress: bool = True,
+         autocomplete: bool = True) -> None:
     """Wire nbboost into the running IPython/Jupyter session.
 
     ``namespace``  puts ``display``, ``show_html`` and ``nbutils`` into the notebook's variables.
@@ -73,6 +74,7 @@ def load(*, namespace: bool = True, methods: bool = True, sql_magic: bool = True
     ``errors_``    shows Spark errors as a short box with the stack trace collapsed.
     ``timing``     prints "Command took 2.3s" after cells that run for at least half a second.
     ``progress``   shows a live progress bar for slow Spark Connect queries.
+    ``autocomplete`` completes table and column names from the Spark catalog (``%sql``, ``spark.table``).
     Safe to call more than once.
     """
     ip = get_ipython()
@@ -95,3 +97,7 @@ def load(*, namespace: bool = True, methods: bool = True, sql_magic: bool = True
     _reregister(ip, "post_run_cell", runtime.after_cell, timing)
     if progress:
         runtime.attach_progress(ip)
+    if autocomplete:
+        completion.install(ip)
+    else:
+        completion.uninstall(ip)

@@ -70,3 +70,15 @@ def test_cell_key_counts_displays_within_one_cell(shown, monkeypatch):
     cols = [{"name": "a", "type": "int"}]
     k1, k2 = disp._cell_key(cols), disp._cell_key(cols)
     assert k1 != k2 and k1.endswith("#0") and k2.endswith("#1")
+
+
+def test_summarize_opens_profile_tab(shown):
+    from nbboost.nbutils import nbutils
+    nbutils.data.summarize(pd.DataFrame({"a": [1, 2]}))
+    assert payload_of(shown[0])["openTab"] == "profile"
+
+
+def test_summarize_rejects_other_objects():
+    from nbboost.nbutils import nbutils
+    with pytest.raises(TypeError):
+        nbutils.data.summarize([1, 2])

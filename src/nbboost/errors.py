@@ -130,6 +130,10 @@ def install(ip) -> None:
     def showtraceback(exc_tuple=None, *args, **kwargs):
         try:
             _, value, _ = ip._get_exc_info(exc_tuple)
+            if type(value).__name__ == "NotebookExit" and type(value).__module__ == "nbboost.notebook":
+                from .notebook import render_exit
+                render_exit(value)
+                return
             if value is not None and is_spark_error(value):
                 _ipy_display(HTML(render(value)))
                 return

@@ -58,3 +58,13 @@ def test_load_wires_new_features_and_flags_turn_them_off():
     assert _shell.runtime.after_cell not in ip.events.callbacks["post_run_cell"]
     assert not hasattr(ip, "_nbboost_orig_showtraceback")
     nbboost.load()
+
+
+def test_load_installs_and_removes_autocomplete():
+    ip = InteractiveShell.instance()
+    ids = lambda: [getattr(m, "matcher_identifier", "") for m in ip.Completer.custom_matchers]  # noqa: E731
+    nbboost.load()
+    assert ids().count("nbboost.catalog") == 1
+    nbboost.load(autocomplete=False)
+    assert "nbboost.catalog" not in ids()
+    nbboost.load()
