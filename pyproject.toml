@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nbboost"
+dynamic = ["version"]
+description = "Power-ups for Jupyter notebooks: interactive result tables, charts and column profiling, %sql, and df.display() for Spark and pandas."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+authors = [{ name = "Anish Saha" }]
+keywords = ["jupyter", "jupyterlab", "ipython", "notebook", "pyspark", "spark-connect", "pandas", "data-visualization", "sql-magic"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Framework :: IPython",
+  "Framework :: Jupyter",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Visualization",
+]
+dependencies = ["ipython>=8"]
+
+[project.optional-dependencies]
+spark = ["pyspark>=3.5"]
+pandas = ["pandas>=1.5"]
+test = ["pytest>=8", "pandas>=1.5"]
+
+[project.urls]
+Homepage = "https://github.com/anishsaha61/nbboost"
+Issues = "https://github.com/anishsaha61/nbboost/issues"
+
+[tool.hatch.version]
+path = "src/nbboost/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nbboost"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

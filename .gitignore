@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Jupyter / editors / OS
+.ipynb_checkpoints/
+.idea/
+.vscode/
+.DS_Store
+
+# Spark local artifacts
+spark-warehouse/
+metastore_db/
+derby.log
