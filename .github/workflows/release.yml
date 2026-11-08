@@ -39,9 +39,16 @@ jobs:
           v="${GITHUB_REF_NAME#v}"
           awk -v v="$v" '$0 ~ "^## \\["v"\\]" {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md > release-notes.md
           { echo; echo "---"; cat test-report.md; } >> release-notes.md
-      - name: Create GitHub Release
+      - name: Create or update GitHub Release
+        # Works whether the release was already published from the web UI or not.
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >
-          gh release create "$GITHUB_REF_NAME" dist/* test-results.xml coverage.xml test-report.md
-          --title "$GITHUB_REF_NAME" --notes-file release-notes.md --verify-tag
+        run: |
+          FILES="dist/* test-results.xml coverage.xml test-report.md"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" $FILES --clobber
+            gh release edit "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file release-notes.md
+          else
+            gh release create "$GITHUB_REF_NAME" $FILES \
+              --title "$GITHUB_REF_NAME" --notes-file release-notes.md --verify-tag
+          fi
