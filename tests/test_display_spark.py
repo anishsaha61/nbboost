@@ -64,3 +64,33 @@ def test_real_spark_error_is_not_logged_as_json_when_muted(spark, monkeypatch):
             spark.sql("select * from nope_tbl_xyz")
     finally:
         errors.unmute_pyspark_logging()
+
+
+def test_real_spark_plan_renders(spark):
+    from nbboost import plan
+    a = spark.range(100).selectExpr("id", "id % 3 as g")
+    b = spark.range(10).selectExpr("id as k")
+    df = a.join(b, a.g == b.k).groupBy("g").count()
+    for mode in ("extended", "formatted", "cost"):
+        h = plan.render(plan.plan_text(df, mode=mode))
+        assert "Physical Plan" in h and "<details" in h
+    h = plan.render(plan.plan_text("select 1 as x", spark=spark))
+    assert "Project" in h
+
+
+def test_real_spark_catalog_completion(spark, tmp_path):
+    from nbboost.catalog import Catalog
+    from nbboost.completion import analyze, suggest
+
+    spark.sql("create database if not exists nbb_cmp")
+    spark.range(3).selectExpr("id", "id * 2 as dbl").write.mode("overwrite").saveAsTable("nbb_cmp.numbers")
+    try:
+        cat = Catalog(lambda: spark)
+        _, items = suggest(*analyze("%%sql\nselect * from nbb_cmp.num", 1, len("select * from nbb_cmp.num")), cat)
+        assert [t for t, _ in items] == ["nbb_cmp.numbers"]
+        cell = "%%sql\nselect db from nbb_cmp.numbers"
+        _, items = suggest(*analyze(cell, 1, len("select db")), cat)
+        assert [t for t, _ in items] == ["dbl"]
+        assert any(d.name == "nbb_cmp" for d in cat.databases())
+    finally:
+        spark.sql("drop database if exists nbb_cmp cascade")
