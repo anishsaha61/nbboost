@@ -46,3 +46,21 @@ def test_df_display_method(spark, shown):
 def test_command_result_without_columns(spark, shown):
     nbboost.display(spark.sql("create or replace temp view tv as select 1"))
     assert payload_of(shown[0])["columns"] == []
+
+
+def test_real_spark_error_is_not_logged_as_json_when_muted(spark, monkeypatch):
+    from pyspark.errors.exceptions.base import PySparkException
+    from pyspark.logger import PySparkLogger
+
+    from nbboost import errors
+
+    def boom(*a, **k):
+        raise AssertionError("PySpark tried to log the error")
+
+    monkeypatch.setattr(PySparkLogger, "getLogger", staticmethod(boom))
+    assert errors.mute_pyspark_logging()
+    try:
+        with pytest.raises(PySparkException):
+            spark.sql("select * from nope_tbl_xyz")
+    finally:
+        errors.unmute_pyspark_logging()

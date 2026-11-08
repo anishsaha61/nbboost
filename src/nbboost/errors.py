@@ -77,6 +77,41 @@ def render(exc: BaseException) -> str:
     )
 
 
+_LOG_ATTR = "_nbboost_orig_log_exception"
+
+
+def mute_pyspark_logging() -> bool:
+    """Stop PySpark from also dumping every error as one huge JSON line on stderr.
+
+    PySpark's ``PySparkException._log_exception`` logs the full message, JVM stack trace and Python
+    stack as a JSON record on stderr (the long red block in notebooks). nbboost already shows the
+    error in a short box, so this logging is switched off. Only applies once pyspark is imported;
+    returns True if it changed anything. Undo with :func:`unmute_pyspark_logging`.
+    """
+    mod = sys.modules.get("pyspark.errors.exceptions.base")
+    cls = getattr(mod, "PySparkException", None)
+    if cls is None or hasattr(cls, _LOG_ATTR) or not hasattr(cls, "_log_exception"):
+        return False
+    setattr(cls, _LOG_ATTR, cls._log_exception)
+    cls._log_exception = lambda self: None
+    return True
+
+
+def unmute_pyspark_logging() -> bool:
+    mod = sys.modules.get("pyspark.errors.exceptions.base")
+    cls = getattr(mod, "PySparkException", None)
+    orig = getattr(cls, _LOG_ATTR, None) if cls is not None else None
+    if orig is None:
+        return False
+    cls._log_exception = orig
+    delattr(cls, _LOG_ATTR)
+    return True
+
+
+def _pre_run_cell(*_a, **_k) -> None:
+    mute_pyspark_logging()  # picks up pyspark when it is imported after nbboost.load()
+
+
 _ORIG = "_nbboost_orig_showtraceback"
 
 
@@ -84,6 +119,12 @@ def install(ip) -> None:
     """Replace ``ip.showtraceback`` so Spark errors render as a short box (idempotent)."""
     if getattr(ip, _ORIG, None) is not None:
         return
+    mute_pyspark_logging()
+    try:
+        ip.events.unregister("pre_run_cell", _pre_run_cell)
+    except ValueError:
+        pass
+    ip.events.register("pre_run_cell", _pre_run_cell)
     orig = ip.showtraceback
 
     def showtraceback(exc_tuple=None, *args, **kwargs):
@@ -101,6 +142,11 @@ def install(ip) -> None:
 
 
 def uninstall(ip) -> None:
+    unmute_pyspark_logging()
+    try:
+        ip.events.unregister("pre_run_cell", _pre_run_cell)
+    except ValueError:
+        pass
     orig = getattr(ip, _ORIG, None)
     if orig is not None:
         ip.showtraceback = orig

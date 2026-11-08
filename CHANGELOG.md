@@ -4,6 +4,9 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+### Fixed
+- Spark errors no longer also print PySpark's huge JSON error log (message + JVM stack trace) in red; only the short error box is shown. Turn off with `load(errors_=False)`.
+
 ## [0.2.0] - 2026-11-08
 
 ### Added

@@ -85,3 +85,52 @@ def test_install_is_idempotent_and_reversible(ip):
     assert ip.showtraceback is wrapped
     errors.uninstall(ip)
     assert ip.showtraceback != wrapped
+
+
+# ---- PySpark's own JSON error log --------------------------------------------------------
+def _stub_pyspark(monkeypatch):
+    import sys
+    import types
+
+    calls = []
+
+    class PySparkException(Exception):
+        def _log_exception(self):
+            calls.append(self)
+
+    mod = types.ModuleType("pyspark.errors.exceptions.base")
+    mod.PySparkException = PySparkException
+    monkeypatch.setitem(sys.modules, "pyspark.errors.exceptions.base", mod)
+    return PySparkException, calls
+
+
+def test_mute_and_unmute_pyspark_logging(monkeypatch):
+    cls, calls = _stub_pyspark(monkeypatch)
+    assert errors.mute_pyspark_logging() is True
+    cls()._log_exception()
+    assert calls == []
+    assert errors.mute_pyspark_logging() is False  # idempotent
+    assert errors.unmute_pyspark_logging() is True
+    cls()._log_exception()
+    assert len(calls) == 1
+    assert errors.unmute_pyspark_logging() is False
+
+
+def test_mute_without_pyspark_is_a_noop(monkeypatch):
+    import sys
+    monkeypatch.delitem(sys.modules, "pyspark.errors.exceptions.base", raising=False)
+    assert errors.mute_pyspark_logging() is False
+
+
+def test_install_mutes_and_uninstall_restores(monkeypatch):
+    cls, calls = _stub_pyspark(monkeypatch)
+    ip = InteractiveShell.instance()
+    errors.uninstall(ip)
+    errors.install(ip)
+    cls()._log_exception()
+    assert calls == []
+    assert errors._pre_run_cell in ip.events.callbacks["pre_run_cell"]
+    errors.uninstall(ip)
+    cls()._log_exception()
+    assert len(calls) == 1
+    assert errors._pre_run_cell not in ip.events.callbacks["pre_run_cell"]
